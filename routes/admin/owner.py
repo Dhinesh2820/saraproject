@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify,request,render_template
-from models import Users,db
+from models.owner import Users,db
+from models.store import Store_category,Store_timings
 owner_bp = Blueprint('owner', __name__)
 
 
@@ -100,3 +101,46 @@ def delete_user(id):
             return jsonify({'message': 'User is already deleted'}), 200
     else:
         return jsonify({'message': 'User not found'}), 404
+    
+    
+    
+@owner_bp.route('/getall')
+def get_category():
+    
+    status_param = request.args.get('status')
+    if status_param is not None:
+        status = int(status_param)
+        if status == 1:
+            users = db.session.query(Users,Store_category,Store_timings).filter_by(status=1).join(Store_category, Users.store_id == Store_category.id).join(Store_timings, Users.store_timings_id == Store_timings.id).all()
+        else:
+           users = db.session.query(Users,Store_category,Store_timings).filter_by(status=1).join(Store_category, Users.store_id == Store_category.id).join(Store_timings, Users.store_timings_id == Store_timings.id).all()
+    else:
+        users = db.session.query(Users,Store_category,Store_timings).filter_by(status=1).join(Store_category, Users.store_id == Store_category.id).join(Store_timings, Users.store_timings_id == Store_timings.id).all()
+    result = []
+    for user1,category1,timing1 in users:
+        user_details = {
+            'admin_role_type' :user1.admin_role_type,
+            'first_name':user1.first_name,
+            'last_name': user1.last_name,
+            'mobile_number': user1.mobile_number,
+            'email_id': user1.email_id,
+            'password': user1.password,
+            'business_name': user1.business_name,
+            'cr_number': user1.cr_number,
+            'status': user1.status,
+            'tax_certificate': user1.tax_certificate,
+        }
+        category_details = {
+            'store_id': category1.store_id,
+            'category_id':category1.category_id,
+        }
+        timing_details = {
+            'day':timing1.day
+        }
+        user_entry = {
+            'user_details': user_details,
+            'category_details': category_details,
+            'timing_details': timing_details,
+        }
+        result.append(user_entry)
+    return jsonify(result)
