@@ -3,11 +3,14 @@ from sqlalchemy import LargeBinary
 from flask_migrate import Migrate
 from datetime import datetime
 from models import db
+from models.category import Category
+from sqlalchemy.orm import relationship
+from alembic import op
 
 
 class Store_timings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    store_id = db.Column(db.Integer)
+    store_id = db.Column(db.Integer,db.ForeignKey('users.id'))
     day = db.Column(db.SmallInteger)
     open_time = db.Column(db.Time)
     close_time = db.Column(db.Time)
@@ -16,6 +19,7 @@ class Store_timings(db.Model):
     updated_on = db.Column(db.DateTime, default=datetime.utcnow)
     created_by = db.Column(db.Integer)
     updated_by = db.Column(db.Integer)
+    fk_store_timings = relationship('Users', backref='Store_timings')
 
 class Store_staff_timings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -30,11 +34,13 @@ class Store_staff_timings(db.Model):
 class Store_category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     store_id = db.Column(db.Integer)
-    category_id= db.Column(db.Integer)
+    category_id= db.Column(db.Integer,db.ForeignKey('category.id'))
     created_on = db.Column(db.DateTime, default=datetime.utcnow)
     updated_on = db.Column(db.DateTime, default=datetime.utcnow)
     created_by = db.Column(db.Integer)
     updated_by = db.Column(db.Integer)
+    fk_store_category = relationship('Category', backref='Store_category')
+    
     
 class Store_main_service(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -100,6 +106,3 @@ class Store_cancellation(db.Model):
         updated_on = db.Column(db.DateTime, default=datetime.utcnow)
         created_by = db.Column(db.Integer)
         updated_by = db.Column(db.Integer)
-    
-    
-    
